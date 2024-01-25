@@ -1,13 +1,14 @@
 const express = require('express');
 const path = require('path');
 
+const aedes = require('aedes')()
+const server = require('net').createServer(aedes.handle)
+const port = 1883
+
 const friendsRouter = require('./routes/friends.router');
 const messagesRouter = require('./routes/messages.router');
 
 const app = express();
-
-app.set('view engine', 'hbs');
-app.set('views', path.join(__dirname, 'views'));
 
 const PORT = 3000;
 
@@ -18,14 +19,10 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.baseUrl}${req.url} ${delta}ms`);
 });
 
-app.use('/site', express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.render('index', {
-    title: 'My Friends Are VERYY Clever',
-    caption: 'Let\'s go skiing!',
-  });
+  res.send('<p>some html</p>');
 });
 app.use('/friends', friendsRouter);
 app.use('/messages', messagesRouter);
@@ -33,3 +30,15 @@ app.use('/messages', messagesRouter);
 app.listen(PORT, () => {
   console.log(`Listening on ${PORT}...`);
 });
+
+aedes.on('client', function (client) {
+  console.log('Client Connected: \x1b[33m' + (client ? client.id : client) + '\x1b[0m', 'to broker', aedes.id)
+})
+
+aedes.on('publish', async function (packet, client) {
+  console.log('Client \x1b[31m' + (client ? client.id : 'BROKER_' + aedes.id) + '\x1b[0m has published', packet.payload.toString(), 'on', packet.topic, 'to broker', aedes.id)
+})
+
+server.listen(port, function () {
+  console.log('server started and listening on port ', port)
+})
