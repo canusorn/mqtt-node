@@ -31,6 +31,38 @@ app.listen(PORT, () => {
   console.log(`Listening on ${PORT}...`);
 });
 
+
+
+
+const authenticate = (client, username, password, callback) => {
+  // Replace this with your actual authentication mechanism
+  console.log(username,password,callback);
+  if (username === 'testuser' && password == 'testpassword') {
+    callback(null, true); // Successful authentication
+  } else {
+    callback(new Error('Authentication failed'), false);
+  }
+};
+
+
+// Attach the authentication handler to the Aedes instance
+aedes.authenticate = authenticate;
+
+// Define your subscription authorization logic
+const authorizeSubscribe = (client, sub, callback) => {
+  // Replace this with your actual authorization mechanism
+  console.log("authorizeSubscribe" + client.username);
+  if (client.username === 'testuser' && sub.topic.startsWith('@test')) {
+    callback(null, true); // Allow subscription
+  } else {
+    callback(new Error('Unauthorized subscription'), false);
+  }
+};
+
+// Attach the authorization handler to the Aedes instance
+aedes.authorizeSubscribe = authorizeSubscribe;
+
+
 aedes.on('client', function (client) {
   console.log('Client Connected: \x1b[33m' + (client ? client.id : client) + '\x1b[0m', 'to broker', aedes.id)
 })
