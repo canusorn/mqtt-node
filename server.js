@@ -36,8 +36,10 @@ app.listen(PORT, () => {
 
 const authenticate = (client, username, password, callback) => {
   // Replace this with your actual authentication mechanism
-  console.log(username,password,callback);
-  if (username === 'testuser' && password == 'testpassword') {
+  password = Buffer.from(password, 'base64').toString();
+  console.log("authenticate id:",client.id,"user:",username);
+  console.log("authenticate password:", password); // spacing level = 2
+  if (username === 'testuser' && password === 'key') {
     callback(null, true); // Successful authentication
   } else {
     callback(new Error('Authentication failed'), false);
@@ -60,7 +62,7 @@ const authorizeSubscribe = (client, sub, callback) => {
 };
 
 // Attach the authorization handler to the Aedes instance
-aedes.authorizeSubscribe = authorizeSubscribe;
+// aedes.authorizeSubscribe = authorizeSubscribe;
 
 
 aedes.on('client', function (client) {
