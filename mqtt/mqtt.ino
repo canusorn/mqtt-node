@@ -76,7 +76,7 @@ void loop() {
   if (millis() - lastMillis > 1000) {
     lastMillis = millis();
 
-    String S = "/" + String(ESP.getChipId());
+    String S = "/" + String(ESP.getChipId()) + "/data";
     int   ArrayLength  = S.length() + 1; //The +1 is for the 0x00h Terminator
     char  CharArray[ArrayLength];
     S.toCharArray(CharArray, ArrayLength);

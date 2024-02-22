@@ -77,41 +77,49 @@ aedes.on('publish', async function (packet, client) {
   // console.log("data:" + Buffer.from(packet.payload, 'base64').toString());
 
   // if(!packet.payload) return;
-
-  const uri = "mongodb://localhost:27017";
-  // let payload;
-  // try {
-  //   payload = JSON.parse(Buffer.from(packet.payload, 'base64').toString());
-  // } catch (e) {
-  //   return; // Or whatever action you want here
-  // }
-  // console.log(payload);
+  if (packet.topic.includes('data')) {
 
 
-  // mongoose.model('testmodel', blogSchema);
+    const uri = "mongodb://localhost:27017";
+    // let payload;
+    // try {
+    //   payload = JSON.parse(Buffer.from(packet.payload, 'base64').toString());
+    // } catch (e) {
+    //   return; // Or whatever action you want here
+    // }
+    // console.log(payload);
 
-  // const doc = new Model();
-  // await doc.save();
 
-  const clientmongo = new MongoClient(uri);
+    // mongoose.model('testmodel', blogSchema);
 
-  try {
-    // Connect to the "insertDB" database and access its "haiku" collection
-    const database = clientmongo.db("insertDB");
-    const haiku = database.collection("haiku");
+    // const doc = new Model();
+    // await doc.save();
 
-    // Create a document to insert
-    const doc = {
-      title: "Record of a Shriveled Datum",
-      content: "No bytes, no problem. Just insert a document, in MongoDB",
+    const clientmongo = new MongoClient(uri);
+
+    try {
+      // Connect to the "insertDB" database and access its "haiku" collection
+      const database = clientmongo.db("insertDB");
+      const haiku = database.collection("haiku");
+      const datapayload = JSON.parse(Buffer.from(packet.payload, 'base64').toString());
+      // Create a document to insert
+      // const doc = JSON.stringify(packet.payload);
+      // const doc = Buffer.from(packet.payload).toString()
+
+      console.log(JSON.stringify(packet.payload));
+
+      // const doc = packet.payload.toString();
+      console.log(typeof (datapayload));
+      console.log(datapayload);
+      // Insert the defined document into the "haiku" collection
+      const result = await haiku.insertOne(datapayload);
+      // Print the ID of the inserted document
+      console.log(`A document was inserted with the _id: ${result.insertedId}`);
+    } finally {
+      // Close the MongoDB client connection
+      await clientmongo.close();
     }
-    // Insert the defined document into the "haiku" collection
-    const result = await haiku.insertOne(doc);
-    // Print the ID of the inserted document
-    console.log(`A document was inserted with the _id: ${result.insertedId}`);
-  } finally {
-    // Close the MongoDB client connection
-    await clientmongo.close();
+
   }
 })
 
