@@ -28,8 +28,8 @@
 
 #define AIO_SERVER      "192.168.0.101"
 #define AIO_SERVERPORT  1883                   // use 8883 for SSL
-#define AIO_USERNAME    "testuser"
-#define CLIENT_ID        "id"
+#define AIO_USERNAME    "user"
+#define CLIENT_ID        String(ESP.getChipId(),DEC).c_str()
 #define AIO_KEY         "key"
 
 /************ Global State (you don't need to change this!) ******************/
@@ -40,17 +40,18 @@ WiFiClient client;
 //WiFiClientSecure client;
 
 // Setup the MQTT client class by passing in the WiFi client and MQTT server and login details.
-Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT,  CLIENT_ID,AIO_USERNAME, AIO_KEY);
+Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT,  CLIENT_ID, AIO_USERNAME, AIO_KEY);
 
 /****************************** Feeds ***************************************/
 
 // Setup a feed called 'photocell' for publishing.
 // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
-Adafruit_MQTT_Publish photocell = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/photocell");
+
 
 // Setup a feed called 'onoff' for subscribing to changes.
 Adafruit_MQTT_Subscribe onoffbutton = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/onoff");
 
+  Adafruit_MQTT_Publish photocell = Adafruit_MQTT_Publish(&mqtt, CLIENT_ID);
 /*************************** Sketch Code ************************************/
 
 // Bug workaround for Arduino 1.6.6, it seems to need a function declaration
@@ -80,6 +81,8 @@ void setup() {
 
   // Setup MQTT subscription for onoff feed.
   mqtt.subscribe(&onoffbutton);
+
+  Serial.println(CLIENT_ID);
 }
 
 uint32_t x = 0;
@@ -100,6 +103,7 @@ void loop() {
       Serial.println((char *)onoffbutton.lastread);
     }
   }
+  
 
   // Now we can publish stuff!
   Serial.print(F("\nSending photocell val "));
